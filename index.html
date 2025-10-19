@@ -5,31 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>絵本「じゃみのうんこっこ村」</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Warm Harmony --><!-- Application Structure Plan: A linear, single-page interactive storybook. The user navigates through the 14 pages of the story using "Next" and "Previous" buttons. This structure mimics reading a physical picture book. The main content area dynamically updates with a pre-defined base64 image and story text for each page, removing the AI generation feature to allow for user-provided, consistent artwork. --><!-- Visualization & Content Choices: The primary content is the story's text and pre-defined images. Goal: To tell a linear story with a fixed set of user-provided illustrations. Presentation: Each page displays a base64 image and its corresponding text. Interaction: Users click navigation buttons to change pages. Justification: This approach provides full artistic control to the user, ensuring the visual style is exactly as intended, while maintaining the interactive storybook format. Method: Vanilla JavaScript for state management and DOM manipulation. --><!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. --><style>
+    <!-- Chosen Palette: Warm Harmony --><!-- Application Structure Plan: A linear, single-page interactive storybook. The user navigates through the 14 pages of the story using "Next" and "Previous" buttons. This structure mimics reading a physical picture book. The main content area dynamically updates with a pre-defined base64 image and story text for each page, removing the AI generation feature to allow for user-provided, consistent artwork. --><!-- Visualization & Content Choices: The primary content is the story's text and pre-defined images. Goal: To tell a linear story with a fixed set of user-provided illustrations. Presentation: Each page displays a base64 image and its corresponding text. Interaction: Users click navigation buttons to change pages. Justification: This approach provides full artistic control to the user, ensuring the visual style is exactly as intended, while maintaining the interactive storybook format. Method: Vanilla JavaScript for state management and DOM manipulation. --><!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->    <!-- Chosen Palette: Warm Harmony --><!-- Application Structure Plan: A linear, single-page interactive storybook. The user navigates through the 14 pages of the story using "Next" and "Previous" buttons. This structure mimics reading a physical picture book. The main content area dynamically updates with a pre-defined base64 image and story text for each page, removing the AI generation feature to allow for user-provided, consistent artwork. --><!-- Visualization & Content Choices: The primary content is the story's text and pre-defined images. Goal: To tell a linear story with a fixed set of user-provided illustrations. Presentation: Each page displays a base64 image and its corresponding text. Interaction: Users click navigation buttons to change pages. Justification: This approach provides full artistic control to the user, ensuring the visual style is exactly as intended, while maintaining the interactive storybook format. Method: Vanilla JavaScript for state management and DOM manipulation. --><!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. --><style>
         body {
+            margin: 0;
             font-family: 'Hiragino Sans', 'ヒラギノ角ゴシック', 'メイリオ', Meiryo, 'MS Pゴシック', sans-serif;
-            background-color: #EFEBE9; /* 背景を少し落ち着いた色に */
-            color: #5D4037;
+            background-color: #000;
+            color: #FDFBF5;
+            min-height: 100vh;
         }
-        
+
         #storybook-container {
-            background-color: #FDFBF5;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.04);
             position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
         }
 
         #storybook-page {
             position: relative;
-            min-height: 520px; /* 縦長になるのを防ぐため、コンテナに高さを設定 */
+            width: 100%;
+            height: 100%;
         }
 
         .page-content-wrapper {
-            position: absolute; /* ページを重ねる */
-            top: 0;
-            left: 0;
+            position: absolute;
+            inset: 0;
             width: 100%;
+            height: 100%;
             transition: transform 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955), opacity 0.6s ease-in-out;
             will-change: transform, opacity;
+        }
+
+        .storybook-visual {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .storybook-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #000;
+        }
+
+        .storybook-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.0) 0%, rgba(0, 0, 0, 0.2) 65%, rgba(0, 0, 0, 1) 100%)
+        }
+
+        .storybook-overlay-content {
+            padding: clamp(1.5rem, 4vw, 3.5rem);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1rem, 2vw, 1.75rem);
+            width: calc(100VW - 400px);
+        }
+
+        .story-text {
+            margin: 0;
+            font-size: clamp(1.1rem, 2.1vw, 1.6rem);
+            line-height: 1.8;
+            white-space: pre-line;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        .cover-overlay {
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        .cover-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
+        }
+
+        .cover-subtitle {
+            margin: 0;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            line-height: 1.6;
+            white-space: pre-line;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
         }
 
         .slide-out-left {
@@ -52,187 +121,212 @@
             opacity: 0;
         }
 
+        .navigation-bar {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(1rem, 3vw, 2rem) clamp(1.5rem, 4vw, 3rem);
+            pointer-events: none;
+        }
+
         .nav-button {
-            transition: all 0.2s ease-in-out;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(253, 251, 245, 0.2);
+            color: #FDFBF5;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 3vw, 2.5rem);
+            border-radius: 999px;
+            transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .nav-button:hover:not(:disabled) {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translateY(-2px);
         }
 
         .nav-button:disabled {
-            opacity: 0.5;
+            opacity: 0.35;
             cursor: not-allowed;
         }
 
-        .flower-indicator {
-            transition: color 0.5s ease-in-out;
+        .page-counter {
+            pointer-events: auto;
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(253, 251, 245, 0.8);
+            margin-top: 30px
         }
     </style>
+
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
+<body>
+    <main id="storybook-container">
+        <div id="storybook-page"></div>
+        <div class="navigation-bar">
+            <button id="prev-button" class="nav-button" aria-label="前のページ">まえへ</button>
+            <div id="page-counter" class="page-counter"></div>
+            <button id="next-button" class="nav-button" aria-label="次のページ">つぎへ</button>
+        </div>
+    </main>
 
-    <div class="w-full max-w-4xl mx-auto">
-        <header class="text-center mb-4">
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#D4A276]">絵本「じゃみのうんこっこ村」</h1>
-        </header>
+<script>
+    const storyDataRaw = [
+    {
+        page: 0,
+        isCover: true,
+        title: "じゃみのうんこっこ村",
+        subtitle: "",
+        imageName: "cover.png",
+        illustration: "霧に包まれた森の入口と村の灯りが柔らかく光る情景"
+    },
+    { page: 1, illustration: "深い森の奥、光が差し込む場所に、小さくてカラフルな家々が見える遠景。煙突から白い煙がもくもく上がっている。", text: "むかしむかし、世界のどこか、ふかーい森のおくに、「じゃみのうんこっこ村」という、ふしぎな名前の村がありました。\n\nどんな村かって？ それはこれからのお話です。", base64Image: ""},
+    { page: 2, illustration: "じゃみの花のアップ。固くつぼみを閉じた状態。周りにはキラキラした粒子がわずかに見える。", text: "村の名前の、ひとつめは「じゃみ」。\n\nこれは、この村にしか咲かない、特別な花の名前です。", base64Image: ""},
+    { page: 3, illustration: "村人たちが楽しそうに笑っている様子。その笑顔に合わせて、パッと開いたじゃみの花が、キラキラと花粉をまき散らしている。", text: "じゃみの花は、みんなのたのしい笑い声を聞くと、ポンッ！ とおとをたてて、パッとひらくのです。\n\nその花粉はキラキラかがやいて、村の畑をゆたかにしてくれました。", base64Image: "" },
+    { page: 4, illustration: "まんまるでふわふわの、ニワトリのような生き物「うんこっこ」。虹色のタマゴを一つ産んでいるところ。周りには他のうんこっこもいる。", text: "ふたつめは、「うんこっこ」。\n\nこれは、村の守り神とされている、ニワトリによくにているけど、もっとまるくてふわふわの生き物です。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 5, illustration: "村人たちが、うんこっこが産んだ虹色のタマゴを囲んで、笑顔で食卓を囲んでいる。タマゴは輝いている。", text: "うんこっこは、まいにちひとつだけ、にじ色のタマゴをうんでくれます。\n\nこのタマゴは、みんなを元気にする、とっておきの食べものでした。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 6, illustration: "じゃみの花が咲き乱れ、うんこっこたちがタマゴを産み、村人たちが畑仕事や遊びに興じながら、みんな笑顔で暮らしている、村全体の賑やかな様子。", text: "じゃみの花のめぐみをうけ、うんこっこのタマゴを食べて、村の人たちは毎日を笑ってすごしていました。\n\n「じゃみのうんこっこ村」は、いつでも笑顔とたのしい声にあふれていました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 7, illustration: "村一番大きな「長老じゃみ」の木。その枝を折ってしまい、しょんぼりとうつむくポッケ。木の根元には折れた枝が転がっている。", text: "ある日のこと。村いちばんのわんぱくぼうず、ポッケが、うっかり村でいちばん大きな「長老じゃみ」の木の枝をポキッと折ってしまいました。\n\nポッケはしょんぼり、笑顔をなくしてしまいました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 8, illustration: "村全体が少し色あせたような、寂しい色合いになっている。村中のじゃみの花が固くつぼみを閉じ、うんこっこたちも元気がなく地面をつついている。ポッケは一人、木の陰で膝を抱えて座っている。", text: "ポッケが笑わなくなると、ふしぎなことに、村の子供たちの笑い声もすくなくなっていきました。\n\nすると、どうでしょう。村じゅうのじゃみの花が、キュッと固くつぼみを閉じてしまったのです。村はだんだん、さみしい色になっていきました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 9, illustration: "村の長老（白くて長いひげを生やした、優しいおじいさん）が、ポッケの隣にそっと座り、優しく話しかけている。", text: "それを見ていた村の長老が、ポッケのところにやってきて、そっと言いました。\n\n「ポッケよ、おまえが枝を折ったことより、おまえが笑わなくなったことのほうが、村にとっては悲しいことなんじゃ。じゃみの花は、正直な心の笑い声が、だいすきなんじゃからのう」", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 10, illustration: "ポッケがハッとした表情で顔を上げる。そして、涙をぬぐいながら、折れた枝を一生懸命拾い上げ、木の幹にくっつけようとしている。その姿は少し不格好で、一生懸命さが伝わる。", text: "ポッケは、長老の言葉をきいて、なみだがポロリとこぼれました。\n\n「ごめんなさい！」\n\nポッケはみんなにそう言うと、折ってしまった枝をひろいあげ、もとの場所へ「えい、えい」と、くっつけようとしました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 11, illustration: "ポッケの一生懸命な姿を見ていた一人の子供が、口に手を当てて「くすっ」と笑っている。その子の近くにある、一つのじゃみのつぼみが、ポンッと音を立てて花開く瞬間。", text: "そのいっしょうけんめいな姿が、なんだかちょっぴりおかしくて、見ていたひとりの子が「くすっ」と笑いました。\n\nポンッ！\n\nその声にこたえるように、ひとつだけ、じゃみの花がひらきました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 12, illustration: "子供たちが次々と笑い出す。ポッケも、自分の不格好な姿に気づいて、つられて「えへへ」と笑っている。あちこちで「ポンッ！」「ポンポンッ！」とじゃみの花が開き始めている。", text: "ひとりが笑うと、もうひとりも笑いだします。「あはは！」「うふふ！」\n\nポッケも、なんだかおかしくなって、とうとう笑ってしまいました。\n\nポンッ！ ポンポンッ！ あちこちで、じゃみの花がひらきはじめます。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 13, illustration: "見開きのページ。村中の人々が、子供も大人もみんな大笑いしている。空には数えきれないほどのじゃみの花が満開になり、キラキラと輝く花粉が雪のように舞っている。うんこっこたちも嬉しそうに「うんこっこー！」と空を向いて鳴いている。", text: "みんなの笑い声が村じゅうにひびきわたると、すべてのじゃみの花が、いっせいにひらきました！\n\nキラキラのかふんが、まるで光の雪のようです。\n\n「うんこっこー！」うんこっこたちも、うれしそうに歌いだしました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
+    { page: 14, illustration: "元の明るさを取り戻した村。ポッケは友達と笑いながら遊んでいる。長老じゃみの木には、折れた枝がそっと立てかけてあり、そこへ一羽の小鳥がとまって巣を作り始めている。みんながそれを見て、にこにこしている。", text: "折れた枝は、元にはもどりませんでした。でも、もう誰も気にしていません。\n\n「じゃみのうんこっこ村」では、失敗したってだいじょうぶ。正直にあやまって、さいごはみんなで笑いとばすのが、いちばんのルールになったのです。\n\nおしまい", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" }
+    ];
 
-        <main id="storybook-container" class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 md:p-12 w-full overflow-hidden">
-            <div id="storybook-page">
-                <!-- Content will be injected here by JS -->
-            </div>
+    const storyData = storyDataRaw.map((page) => ({
+        ...page,
+        imageUrl: page.imageName ? `images/${page.imageName}` : `images/${page.page}.png`,
+    }));
 
-            <div id="flower-indicator-bar" class="flex justify-center items-center space-x-2 my-6">
-            </div>
+    const storyPageCount = storyData.filter((page) => !page.isCover).length;
+    const totalPages = storyData.length;
 
-            <div class="flex justify-between items-center mt-6">
-                <button id="prev-button" class="nav-button bg-[#EADFD5] hover:bg-[#D4C4B3] text-[#5D4037] font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-full shadow-md disabled:hover:bg-[#EADFD5]">まえへ</button>
-                <div id="page-counter" class="text-sm sm:text-base text-[#8C6D5B] font-medium"></div>
-                <button id="next-button" class="nav-button bg-[#D4A276] hover:bg-[#C89666] text-white font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-full shadow-md">つぎへ</button>
-            </div>
-        </main>
+    let currentPageIndex = 0;
+    let isAnimating = false;
 
-        <footer class="text-center mt-4">
-            <p class="text-xs text-gray-400">インタラクティブ絵本</p>
-        </footer>
-    </div>
+    const storybookPage = document.getElementById('storybook-page');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const pageCounter = document.getElementById('page-counter');
 
-    <script>
-        const storyData = [
-            { page: 1, illustration: "深い森の奥、光が差し込む場所に、小さくてカラフルな家々が見える遠景。煙突から白い煙がもくもく上がっている。", text: "むかしむかし、世界のどこか、ふかーい森のおくに、「じゃみのうんこっこ村」という、ふしぎな名前の村がありました。\n\nどんな村かって？ それはこれからのお話です。", base64Image: ""},
-            { page: 2, illustration: "じゃみの花のアップ。固くつぼみを閉じた状態。周りにはキラキラした粒子がわずかに見える。", text: "村の名前の、ひとつめは「じゃみ」。\n\nこれは、この村にしか咲かない、特別な花の名前です。", base64Image: ""},
-            { page: 3, illustration: "村人たちが楽しそうに笑っている様子。その笑顔に合わせて、パッと開いたじゃみの花が、キラキラと花粉をまき散らしている。", text: "じゃみの花は、みんなのたのしい笑い声を聞くと、ポンッ！ とおとをたてて、パッとひらくのです。\n\nその花粉はキラキラかがやいて、村の畑をゆたかにしてくれました。", base64Image: "" },
-            { page: 4, illustration: "まんまるでふわふわの、ニワトリのような生き物「うんこっこ」。虹色のタマゴを一つ産んでいるところ。周りには他のうんこっこもいる。", text: "ふたつめは、「うんこっこ」。\n\nこれは、村の守り神とされている、ニワトリによくにているけど、もっとまるくてふわふわの生き物です。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 5, illustration: "村人たちが、うんこっこが産んだ虹色のタマゴを囲んで、笑顔で食卓を囲んでいる。タマゴは輝いている。", text: "うんこっこは、まいにちひとつだけ、にじ色のタマゴをうんでくれます。\n\nこのタマゴは、みんなを元気にする、とっておきの食べものでした。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 6, illustration: "じゃみの花が咲き乱れ、うんこっこたちがタマゴを産み、村人たちが畑仕事や遊びに興じながら、みんな笑顔で暮らしている、村全体の賑やかな様子。", text: "じゃみの花のめぐみをうけ、うんこっこのタマゴを食べて、村の人たちは毎日を笑ってすごしていました。\n\n「じゃみのうんこっこ村」は、いつでも笑顔とたのしい声にあふれていました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 7, illustration: "村一番大きな「長老じゃみ」の木。その枝を折ってしまい、しょんぼりとうつむくポッケ。木の根元には折れた枝が転がっている。", text: "ある日のこと。村いちばんのわんぱくぼうず、ポッケが、うっかり村でいちばん大きな「長老じゃみ」の木の枝をポキッと折ってしまいました。\n\nポッケはしょんぼり、笑顔をなくしてしまいました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 8, illustration: "村全体が少し色あせたような、寂しい色合いになっている。村中のじゃみの花が固くつぼみを閉じ、うんこっこたちも元気がなく地面をつついている。ポッケは一人、木の陰で膝を抱えて座っている。", text: "ポッケが笑わなくなると、ふしぎなことに、村の子供たちの笑い声もすくなくなっていきました。\n\nすると、どうでしょう。村じゅうのじゃみの花が、キュッと固くつぼみを閉じてしまったのです。村はだんだん、さみしい色になっていきました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 9, illustration: "村の長老（白くて長いひげを生やした、優しいおじいさん）が、ポッケの隣にそっと座り、優しく話しかけている。", text: "それを見ていた村の長老が、ポッケのところにやってきて、そっと言いました。\n\n「ポッケよ、おまえが枝を折ったことより、おまえが笑わなくなったことのほうが、村にとっては悲しいことなんじゃ。じゃみの花は、正直な心の笑い声が、だいすきなんじゃからのう」", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 10, illustration: "ポッケがハッとした表情で顔を上げる。そして、涙をぬぐいながら、折れた枝を一生懸命拾い上げ、木の幹にくっつけようとしている。その姿は少し不格好で、一生懸命さが伝わる。", text: "ポッケは、長老の言葉をきいて、なみだがポロリとこぼれました。\n\n「ごめんなさい！」\n\nポッケはみんなにそう言うと、折ってしまった枝をひろいあげ、もとの場所へ「えい、えい」と、くっつけようとしました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 11, illustration: "ポッケの一生懸命な姿を見ていた一人の子供が、口に手を当てて「くすっ」と笑っている。その子の近くにある、一つのじゃみのつぼみが、ポンッと音を立てて花開く瞬間。", text: "そのいっしょうけんめいな姿が、なんだかちょっぴりおかしくて、見ていたひとりの子が「くすっ」と笑いました。\n\nポンッ！\n\nその声にこたえるように、ひとつだけ、じゃみの花がひらきました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 12, illustration: "子供たちが次々と笑い出す。ポッケも、自分の不格好な姿に気づいて、つられて「えへへ」と笑っている。あちこちで「ポンッ！」「ポンポンッ！」とじゃみの花が開き始めている。", text: "ひとりが笑うと、もうひとりも笑いだします。「あはは！」「うふふ！」\n\nポッケも、なんだかおかしくなって、とうとう笑ってしまいました。\n\nポンッ！ ポンポンッ！ あちこちで、じゃみの花がひらきはじめます。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 13, illustration: "見開きのページ。村中の人々が、子供も大人もみんな大笑いしている。空には数えきれないほどのじゃみの花が満開になり、キラキラと輝く花粉が雪のように舞っている。うんこっこたちも嬉しそうに「うんこっこー！」と空を向いて鳴いている。", text: "みんなの笑い声が村じゅうにひびきわたると、すべてのじゃみの花が、いっせいにひらきました！\n\nキラキラのかふんが、まるで光の雪のようです。\n\n「うんこっこー！」うんこっこたちも、うれしそうに歌いだしました。", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" },
-            { page: 14, illustration: "元の明るさを取り戻した村。ポッケは友達と笑いながら遊んでいる。長老じゃみの木には、折れた枝がそっと立てかけてあり、そこへ一羽の小鳥がとまって巣を作り始めている。みんながそれを見て、にこにこしている。", text: "折れた枝は、元にはもどりませんでした。でも、もう誰も気にしていません。\n\n「じゃみのうんこっこ村」では、失敗したってだいじょうぶ。正直にあやまって、さいごはみんなで笑いとばすのが、いちばんのルールになったのです。\n\nおしまい", base64Image: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" }
-        ];
+    function createPageContent(index) {
+        const pageData = storyData[index];
+        const overlayClasses = ['storybook-overlay'];
+        if (pageData.isCover) {
+            overlayClasses.push('cover-overlay');
+        }
 
-        let currentPageIndex = 0;
-        const totalPages = storyData.length;
-        let isAnimating = false;
-
-        const storybookPage = document.getElementById('storybook-page');
-        const prevButton = document.getElementById('prev-button');
-        const nextButton = document.getElementById('next-button');
-        const pageCounter = document.getElementById('page-counter');
-        const flowerBar = document.getElementById('flower-indicator-bar');
-        
-        const flowerColors = ['#F9A8D4', '#FBBF24', '#A7F3D0', '#BFDBFE', '#DDD6FE'];
-
-        function createFlowerBar() {
-            flowerBar.innerHTML = '';
-            for (let i = 0; i < 7; i++) {
-                const flower = document.createElement('div');
-                flower.classList.add('flower-indicator', 'text-2xl', 'sm:text-3xl');
-                flower.innerHTML = '✿';
-                flowerBar.appendChild(flower);
+        const overlayParts = [];
+        if (pageData.isCover) {
+            if (pageData.title) {
+                overlayParts.push(`<h2 class="cover-title">${pageData.title}</h2>`);
             }
+            if (pageData.subtitle) {
+                overlayParts.push(`<p class="cover-subtitle">${pageData.subtitle}</p>`);
+            }
+        } else if (pageData.text) {
+            overlayParts.push(`<p class="story-text">${pageData.text}</p>`);
         }
-        
-        function updateFlowerBar(pageIndex) {
-            const flowers = flowerBar.querySelectorAll('.flower-indicator');
-            flowers.forEach((flower, index) => {
-                if (pageIndex < 7) {
-                    flower.style.color = flowerColors[index % flowerColors.length];
-                } else if (pageIndex >= 7 && pageIndex < 10) {
-                     flower.style.color = '#D1D5DB';
-                } else if (pageIndex === 10) {
-                     flower.style.color = index < 2 ? flowerColors[index % flowerColors.length] : '#D1D5DB';
-                } else if (pageIndex === 11) {
-                     flower.style.color = index < 5 ? flowerColors[index % flowerColors.length] : '#D1D5DB';
-                } else {
-                    flower.style.color = flowerColors[index % flowerColors.length];
-                }
-            });
-        }
-        
-        function createPageContent(index) {
-            const pageData = storyData[index];
-            return `
-                <div class="page-content-wrapper">
-                    <div id="illustration-box" class="w-full h-48 sm:h-64 md:h-80 bg-[#F5EFE6] rounded-xl border-2 border-[#EADFD5] flex flex-col items-center justify-center p-4 mb-6 relative overflow-hidden">
-                        <img src="${pageData.base64Image}" alt="${pageData.illustration}" class="w-full h-full object-contain rounded-xl">
-                    </div>
-                    <div id="story-text-container" class="min-h-[120px] sm:min-h-[150px]">
-                         <p id="story-text" class="text-base sm:text-lg md:text-xl leading-relaxed text-center whitespace-pre-line">${pageData.text}</p>
+
+        const overlayContent = overlayParts.length
+            ? `<div class="storybook-overlay-content">${overlayParts.join('')}</div>`
+            : '';
+
+        return `
+            <div class="page-content-wrapper">
+                <div class="storybook-visual">
+                    <img src="${pageData.imageUrl}" alt="${pageData.illustration || pageData.title || ''}">
+                    <div class="${overlayClasses.join(' ')}">
+                        ${overlayContent}
                     </div>
                 </div>
-            `;
+            </div>
+        `;
+    }
+
+    function updatePageCounter() {
+        const pageData = storyData[currentPageIndex];
+        if (pageData.isCover) {
+            pageCounter.textContent = '表紙';
+        } else {
+            pageCounter.textContent = `${pageData.page} / ${storyPageCount}`;
+        }
+    }
+
+    function updateUIState() {
+        prevButton.disabled = currentPageIndex === 0;
+        if (currentPageIndex === totalPages - 1) {
+            nextButton.textContent = 'はじめから';
+        } else {
+            nextButton.textContent = 'つぎへ';
+        }
+        updatePageCounter();
+    }
+
+    function renderPage(index, direction = 'next') {
+        if (isAnimating) {
+            return;
+        }
+        isAnimating = true;
+
+        const oldPage = storybookPage.querySelector('.page-content-wrapper');
+
+        if (oldPage) {
+            oldPage.classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
         }
 
-        function renderPage(index, direction = 'next') {
-            if (isAnimating) return;
-            isAnimating = true;
+        const newPage = document.createElement('div');
+        newPage.innerHTML = createPageContent(index);
+        const newPageContent = newPage.firstElementChild;
 
-            const oldPage = storybookPage.querySelector('.page-content-wrapper');
-            
+        newPageContent.classList.add(direction === 'next' ? 'slide-in-from-right' : 'slide-in-from-left');
+        storybookPage.appendChild(newPageContent);
+
+        requestAnimationFrame(() => {
+            newPageContent.classList.remove(direction === 'next' ? 'slide-in-from-right' : 'slide-in-from-left');
+        });
+
+        setTimeout(() => {
             if (oldPage) {
-                oldPage.classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
+                oldPage.remove();
             }
-
-            const newPageHTML = createPageContent(index);
-            const newPage = document.createElement('div');
-            newPage.innerHTML = newPageHTML;
-            const newPageContent = newPage.querySelector('.page-content-wrapper');
-            
-            newPageContent.classList.add(direction === 'next' ? 'slide-in-from-right' : 'slide-in-from-left');
-            storybookPage.appendChild(newPageContent);
-
-            requestAnimationFrame(() => {
-                newPageContent.classList.remove(direction === 'next' ? 'slide-in-from-right' : 'slide-in-from-left');
-            });
-            
-            setTimeout(() => {
-                if (oldPage) {
-                    oldPage.remove();
-                }
-                pageCounter.textContent = `${storyData[index].page} / ${totalPages}`;
-                updateUIState();
-                updateFlowerBar(index);
-                isAnimating = false;
-            }, 600);
-        }
-
-        function updateUIState() {
-            prevButton.disabled = currentPageIndex === 0;
-
-            if (currentPageIndex === totalPages - 1) {
-                nextButton.textContent = 'はじめから';
-            } else {
-                nextButton.textContent = 'つぎへ';
-            }
-        }
-
-        prevButton.addEventListener('click', () => {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                renderPage(currentPageIndex, 'prev');
-            }
-        });
-
-        nextButton.addEventListener('click', () => {
-            if (currentPageIndex < totalPages - 1) {
-                currentPageIndex++;
-                renderPage(currentPageIndex, 'next');
-            } else {
-                currentPageIndex = 0;
-                renderPage(currentPageIndex, 'next');
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            storybookPage.innerHTML = createPageContent(currentPageIndex);
-            pageCounter.textContent = `${storyData[currentPageIndex].page} / ${totalPages}`;
             updateUIState();
-            createFlowerBar();
-            updateFlowerBar(currentPageIndex);
-        });
+            isAnimating = false;
+        }, 600);
+    }
 
-    </script>
+    prevButton.addEventListener('click', () => {
+        if (currentPageIndex > 0) {
+            currentPageIndex -= 1;
+            renderPage(currentPageIndex, 'prev');
+        }
+    });
+
+    nextButton.addEventListener('click', () => {
+        if (currentPageIndex < totalPages - 1) {
+            currentPageIndex += 1;
+            renderPage(currentPageIndex, 'next');
+        } else {
+            currentPageIndex = 0;
+            renderPage(currentPageIndex, 'next');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        storybookPage.innerHTML = createPageContent(currentPageIndex);
+        updateUIState();
+    });
+</script>
+
 </body>
 </html>
 
